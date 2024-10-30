@@ -243,3 +243,72 @@ def auto_correlation_test(epsilon,tau = 50):
     ax.plot(np.arange(1,tau+1),-np.ones(tau)*bound_e,'k:')
     ax.set_title('Auto Correlation of Prediction Error')
     ax.set_xlabel('Lag (samples)')
+
+
+def FIR_estimates_GH(n, y, u):
+
+    na = n[0]
+    nb = n[1]
+    nk = n[2]
+
+    ng = nb
+    nh = na
+
+    theta = sid.V_arx_lin_reg(n,y,r)
+
+    A = -theta[0:na]
+    B = theta[na:nb+na]
+
+    rB = np.concatenate(([B[0]], np.zeros(na-1)))
+    cB = B
+    
+    rA = np.concatenate(([1], np.zeros(na-1)))
+    cA = np.concatenate(([1], -A[0:na-1]))
+
+    CB = sp.linalg.toeplitz(cB,r=rB)
+    CA = sp.linalg.toeplitz(cA,r=rA)
+    
+    M = np.block([[np.zeros((na,nb)), CA], [np.eye(nb), -CB]])
+    
+    theta_gh = np.linalg.inv( M.T @ M ) @ (M.T @ np.concatenate((A, B)))
+
+    g = np.concatenate((np.zeros(nk), theta_gh[0:ng]))
+    h = np.concatenate(([1], theta_gh[ng:ng+nh]))
+
+    return g, h
+
+
+def tf_realization_GH(g,h,n)
+
+    na = n[0]
+    nb = n[1]
+    nc = n[2]
+    nd = n[3]
+    nk = n[4]
+
+    nh = h.shape[0]-1
+    ng = g.shape[0]-nk
+
+    Cg = np.array(sp.linalg.toeplitz(np.concatenate(([0],g[nk:nk+ng-1])),r=np.zeros(na)))
+    Meye = np.concatenate((np.eye(nb), np.zeros((ng-nb,nb))),axis=0)
+    M = np.concatenate((Meye,-Cg),axis=1)
+    thetaBA = np.linalg.inv( M.T @ M ) @ (M.T @ g[nk:ng+nk] )
+
+    Ch = np.array(sp.linalg.toeplitz(h[0:nh],r=np.concatenate(([1],np.zeros(nd-1)))))
+    Meye = np.concatenate((np.eye(nc), np.zeros((nh-nc,nc))),axis=0)
+    M = np.concatenate((Meye,-Ch),axis=1)
+    thetaCD = np.linalg.inv( M.T @ M ) @ (M.T @ h[1:nh+1] )
+
+    return np.concatenate((thetaBA,thetaCD))
+
+    
+
+def get_regression_matrix(w,t0,i1,i2):
+    
+    N = w.shape[0]
+    phi = np.zeros((N-t0+i1,i2-i1))
+
+    for ii in range(N-t0+i1):
+        for jj in range(i1,i2):
+            phi[ii,jj] = w[ii+t0-jj]   
+    return phi
