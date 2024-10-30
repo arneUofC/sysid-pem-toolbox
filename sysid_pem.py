@@ -278,7 +278,7 @@ def FIR_estimates_GH(n, y, u):
     return g, h
 
 
-def tf_realization_GH(g,h,n)
+def tf_realization_GH(g,h,n):
 
     na = n[0]
     nb = n[1]
