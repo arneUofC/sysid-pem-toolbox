@@ -254,7 +254,7 @@ def FIR_estimates_GH(n, y, u):
     ng = nb
     nh = na
 
-    theta = sid.V_arx_lin_reg(n,y,r)
+    theta = V_arx_lin_reg(n,y,u)
 
     A = -theta[0:na]
     B = theta[na:nb+na]
@@ -299,9 +299,26 @@ def tf_realization_GH(g,h,n):
     M = np.concatenate((Meye,-Ch),axis=1)
     thetaCD = np.linalg.inv( M.T @ M ) @ (M.T @ h[1:nh+1] )
 
-    return np.concatenate((thetaBA,thetaCD))
+    theta = np.concatenate((thetaBA[0:nb], thetaCD, thetaBA[nb:nb+na]))
+    return theta
 
-    
+
+def get_initial_estimate_box_jenkins(n,n_high_order_approx, y,u):
+    #nb = n[0]
+    #nc = n[1]
+    #nd = n[2]
+    #nf = n[3]
+    nk = n[4]
+
+    na_ho = n_high_order_approx[0]
+    nb_ho = n_high_order_approx[1]
+    n_arx = [na_ho, nb_ho, nk] 
+
+    g_imp_est, h_imp_est = FIR_estimates_GH(n_arx,y,u)
+
+    theta_init_bj = tf_realization_GH(g_imp_est,h_imp_est,n)
+    return theta_init_bj
+
 
 def get_regression_matrix(w,t0,i1,i2):
     
