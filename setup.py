@@ -1,11 +1,15 @@
 from setuptools import setup, find_packages
 
+# Defines the package metadata and depencies
+
 setup(
     name="sysid_pem_toolbox",
     version="0.1.0",
-    description="A System Identification and PEM Toolbox",
     author="Arne Dankers",
     author_email="arne.dankers2@ucalgary.ca",
+    description="A System Identification and PEM Toolbox",
+    long_description=open('README.md').read(),
+    url='https://github.com/arneUofC/sysid-pem-toolbox',
     packages=find_packages(),
     install_requires=[
         "control",
