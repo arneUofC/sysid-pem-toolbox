@@ -19,7 +19,6 @@ build:
 python:
   install:
     - requirements: docs/requirements.txt  # Points to the requirements file for documentation dependencies
-    - method: setuptools  # Use setuptools to install your package for documentation
 
 
 # Sphinx configuration
