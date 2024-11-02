@@ -5,9 +5,18 @@
 # Required
 version: 2
 
+# Set the OS, Python version and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.8"
+    # You can also specify other tool versions:
+    # nodejs: "19"
+    # rust: "1.64"
+    # golang: "1.19"
+
 # Specify Python details for the build environment
 python:
-  version: 3.8  # Adjust this if your project needs a different Python version
   install:
     - requirements: docs/requirements.txt  # Points to the requirements file for documentation dependencies
     - method: setuptools  # Use setuptools to install your package for documentation
