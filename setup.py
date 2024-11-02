@@ -9,6 +9,7 @@ setup(
     author_email="arne.dankers2@ucalgary.ca",
     description="A System Identification and PEM Toolbox",
     long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     url='https://github.com/arneUofC/sysid-pem-toolbox',
     packages=find_packages(),
     install_requires=[
