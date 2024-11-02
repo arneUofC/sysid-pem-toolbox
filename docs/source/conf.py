@@ -6,6 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+# conf.py
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
+
 project = 'sysid_pem_toolbox'
 copyright = '2024, Arne Dankers'
 author = 'Arne Dankers'
@@ -15,9 +21,13 @@ release = '0.1.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.napoleon'
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',  # Automatically document functions/classes
+    'sphinx.ext.napoleon',  # Support for Google/NumPy style docstrings
+    'sphinx.ext.viewcode',  # Link to source code
 ]
+
+# Use Read the Docs theme if available
+html_theme = 'sphinx_rtd_theme'
 
 # Set autodoc to follow the order of members in the source code
 autodoc_member_order = 'bysource'

@@ -1,0 +1,3 @@
+sphinx
+sphinx-rtd-theme  # Optional: RTD theme for styling
+sphinxcontrib-napoleon  # To support Google/NumPy style docstrings
