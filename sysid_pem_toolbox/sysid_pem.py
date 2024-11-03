@@ -251,39 +251,39 @@ def FIR_estimates_GH(n, y, u):
     nb = n[1]
     nk = n[2]
 
-    ng = nb
-    nh = na
+    ng = nb+1
+    nh = na+1
 
     theta = V_arx_lin_reg(n,y,u)
 
     A = -theta[0:na]
     B = theta[na:nb+na]
 
-    rB = np.concatenate(([B[0]], np.zeros(na-1)))
-    cB = B
-    
-    rA = np.concatenate(([1], np.zeros(na-1)))
-    cA = np.concatenate(([1], -A[0:na-1]))
+    rB = np.zeros(nh)
+    cB = np.concatenate(([0],B,np.zeros(ng-nb-1)))
+
+    rA = np.concatenate(([1], np.zeros(nh-1)))
+    cA = np.concatenate(([1], -A, np.zeros(nh-na-1)))
 
     CB = sp.linalg.toeplitz(cB,r=rB)
     CA = sp.linalg.toeplitz(cA,r=rA)
-    
-    M = np.block([[np.zeros((na,nb)), CA], [np.eye(nb), -CB]])
-    
-    theta_gh = np.linalg.inv( M.T @ M ) @ (M.T @ np.concatenate((A, B)))
 
-    g = np.concatenate((np.zeros(nk), theta_gh[0:ng]))
-    h = np.concatenate(([1], theta_gh[ng:ng+nh]))
+    M = np.block([[np.eye(ng), -CB],[np.zeros((nh,ng)), CA]])
+    V = np.concatenate((B,np.zeros(ng-nb),A,np.zeros(nh-na)))
+    
+    theta_gh = np.linalg.inv( M.T @ M ) @ (M.T @ V)
+
+    g = np.concatenate((np.zeros(nk), theta_gh[0:ng-1]))
+    h = np.concatenate(([1], theta_gh[ng:ng+nh-1]))
 
     return g, h
 
 
 def tf_realization_GH(g,h,n):
-
-    na = n[0]
-    nb = n[1]
-    nc = n[2]
-    nd = n[3]
+    nb = n[0]
+    nc = n[1]
+    nd = n[2]
+    na = n[3]
     nk = n[4]
 
     nh = h.shape[0]-1
