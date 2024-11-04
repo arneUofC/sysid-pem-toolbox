@@ -524,9 +524,8 @@ def auto_correlation_test(epsilon,tau = 50):
 
 def FIR_estimates_GH(n, y, u):
 
-    na = n[0]
-    nb = n[1]
-    nk = n[2]
+
+    na, nb, nk = n
 
     ng = nb+1
     nh = na+1
