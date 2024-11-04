@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: sysid_pem_toolbox
+Version: 0.1.0
+Summary: A System Identification and PEM Toolbox
+Home-page: https://github.com/arneUofC/sysid-pem-toolbox
+Author: Arne Dankers
+Author-email: arne.dankers2@ucalgary.ca
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: control
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+
+# SYSID-PEM-TOOLBOX
+
+System Identification and PEM Toolbox (SYSID-PEM-TOOLBOX).
+
+## Installation
+Clone the repository and install dependencies:
+```bash
+pip install -r requirements.txt
