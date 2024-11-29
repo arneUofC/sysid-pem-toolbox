@@ -41,7 +41,7 @@ def validate_inputs(n, u, y, model_type="ARX"):
             raise ValueError("ARX model requires (n_a, n_b, n_k).")
         na, nb, nk = n
         nb -= 1
-        if na > nb - 1:
+        if nb > na:
             raise ValueError("In ARX, nb must not be greater than na.")
 
     elif model_type == "Box-Jenkins":
