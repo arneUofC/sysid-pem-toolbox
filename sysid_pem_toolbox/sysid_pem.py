@@ -622,11 +622,11 @@ def FIR_estimates_GH(n, y, u):
 
 def tf_realization_GH(g,h,n):
     
-    # nb = n[0]
-    # nc = n[1]
-    # nd = n[2]
-    # na = n[3]
-    # nk = n[4]
+    nb = n[0]
+    nc = n[1]
+    nd = n[2]
+    na = n[3]
+    nk = n[4]
 
     nh = h.shape[0]-1
     ng = g.shape[0]-nk
@@ -674,10 +674,10 @@ def get_initial_estimate_box_jenkins(n,n_high_order_approx, y,u):
         Initial parameter vector estimate for Box-Jenkins model.
     """
     validate_inputs(n, u, y, "Box-Jenkins") # The Box-Jenkins is a placeholder for the FIR model
-    #nb = n[0]
-    #nc = n[1]
-    #nd = n[2]
-    #nf = n[3]
+    nb = n[0]
+    nc = n[1]
+    nd = n[2]
+    nf = n[3]
     nk = n[4]
 
     na_ho = n_high_order_approx[0]
