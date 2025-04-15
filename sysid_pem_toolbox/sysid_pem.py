@@ -4,6 +4,55 @@ import scipy as sp
 import matplotlib.pyplot as plt
 
 
+def validate_inputs(n, u, y, model_type="ARX"):
+    """
+    Validates the inputs for common conditions, dynamically adjusting checks 
+    based on the model type.
+
+    Parameters:
+    ----------
+    n : list or tuple
+        Model orders. Structure depends on the model type:
+        - ARX: (n_a, n_b, n_k)
+        - Box-Jenkins: (n_b, n_c, n_d, n_f, n_k).
+    u : ndarray
+        Input data.
+    y : ndarray
+        Output data.
+    model_type : str, optional
+        Type of the model. Options are "ARX" (default) or "Box-Jenkins".
+
+    Raises:
+    -------
+    ValueError
+        If any of the conditions are violated.
+    """
+    # Check if n is a list/tuple of integers
+    if not isinstance(n, (list, tuple)) or not all(isinstance(x, int) for x in n):
+        raise ValueError("n must be a list or tuple of integers.")
+    
+    # Check if u and y have the same size
+    if len(u) != len(y):
+        raise ValueError("u and y must have the same size.")
+    
+    # Validate model-specific conditions
+    if model_type == "ARX":
+        if len(n) < 3:
+            raise ValueError("ARX model requires (n_a, n_b, n_k).")
+        na, nb, nk = n
+        nb -= 1
+        if nb > na:
+            raise ValueError("In ARX, nb must not be greater than na.")
+
+    elif model_type == "Box-Jenkins":
+        # nb, nc, nd, nf, nk = n
+        pass
+
+    else:
+        raise ValueError(f"Unsupported model type: {model_type}.")
+
+
+
 def theta_2_BCDF(theta, n):
     """
     Converts the parameter vector theta into coefficient arrays B, C, D, and F 
@@ -27,6 +76,8 @@ def theta_2_BCDF(theta, n):
     F : ndarray
         Coefficients for the F polynomial.
     """
+    
+    validate_inputs(n, np.array([]), np.array([]),"Box-Jenkins")
     nb, nc, nd, nf, nk = n
     
     # The following code above is equivalent to the commented code below
@@ -93,7 +144,7 @@ def theta_2_tf_box_jenkins(theta,n,Ts):
     H_theta : TransferFunction
         Transfer function for the noise model.
     """
-    
+    validate_inputs(n, np.array([]), np.array([]),"Box-Jenkins")
     B,C,D,F = theta_2_BCDF(theta,n)
     G_theta = ct.tf(B, F, Ts)
     H_theta = ct.tf(C, D, Ts)
@@ -121,6 +172,7 @@ def jac_V_bj(theta, n, y, u):
     depsilonTot : ndarray
         The Jacobian matrix.
     """
+    validate_inputs(n, u,y,"Box-Jenkins")
     N = y.shape[0]
     nb, nc, nd, nf, nk = n
     
@@ -204,8 +256,9 @@ def V_box_jenkins(theta, n, y, u):
     epsilon : ndarray
         The prediction error.
     """
+    validate_inputs(n, u,y,"Box-Jenkins")
     N = y.shape[0]
-    y_hat = y_hat_box_jenkins(theta,n,y,u)
+    y_hat = y_hat_box_jenkins(theta, n, y, u)
     epsilon = y - y_hat
     
     #return np.sum(epsilon**2)/N
@@ -232,6 +285,7 @@ def y_hat_box_jenkins(theta, n, y, u):
     y_hat : ndarray
         The predicted output.
     """
+    validate_inputs(n, u, y,"Box-Jenkins")
     B,C,D,F = theta_2_BCDF(theta,n)
     G_theta = ct.tf(B, F, True)
     H_theta = ct.tf(C, D, True)    
@@ -262,6 +316,7 @@ def V_oe(theta, n, y, u):
     cost : float
         The cost function value.
     """
+    validate_inputs(n, u, y,"Box-Jenkins")
     theta_b = theta[0:n[0]]
     theta_f = np.concatenate(([1],theta[n[0]:n[0]+n[1]]))
 
@@ -292,6 +347,7 @@ def theta_2_tf_oe(theta,n, Ts):
     H_theta : TransferFunction
         Transfer function for the noise model (identity in OE model).
     """
+    validate_inputs(n, np.array([]), np.array([]), "Box-Jenkins")
     theta_b = theta[0:n[0]]
     theta_f = np.concatenate(([1],theta[n[0]:n[0]+n[1]]))
 
@@ -323,6 +379,7 @@ def y_hat_oe(theta, n, y, u):
     epsilon : np.ndarray
         Prediction error between the observed and predicted output.
     """
+    validate_inputs(n, u, y, "Box-Jenkins")
     # Extracting numerator (B) and denominator (F) coefficients from theta
     theta_b = theta[0:n[0]]
     theta_f = np.concatenate(([1],theta[n[0]:n[0]+n[1]])) # Include leading 1 in denominator
@@ -361,6 +418,7 @@ def V_arx_lin_reg(n, y, u):
     theta : np.ndarray
         Estimated parameters of the ARX model.
     """
+    validate_inputs(n, u, y, "ARX")
     
     # Extract orders and delay from the input tuple `n`
     na, nb, nk = n
@@ -413,6 +471,7 @@ def theta_2_tf_arx(theta,n,Ts):
     H_theta : control.TransferFunction
         Transfer function of the noise model (H).
     """
+    validate_inputs(n, np.array([]), np.array([]), "ARX")
     na, nb, nk = n
     # The following code above is equivalent to the commented code below
     # na = n[0]
@@ -508,6 +567,7 @@ def auto_correlation_test(epsilon,tau = 50):
     -------
     None
     """
+    
     N = epsilon.shape[0]
     
     # Compute auto-correlation of epsilon
@@ -527,6 +587,8 @@ def auto_correlation_test(epsilon,tau = 50):
 
 
 def FIR_estimates_GH(n, y, u):
+    
+    validate_inputs(n, u, y, "Box-Jenkins") # The Box-Jenkins is a placeholder for the FIR model
 
     na, nb, nk = n
     ng = nb+1
@@ -559,11 +621,12 @@ def FIR_estimates_GH(n, y, u):
 
 
 def tf_realization_GH(g,h,n):
-    nb = n[0]
-    nc = n[1]
-    nd = n[2]
-    na = n[3]
-    nk = n[4]
+    
+    # nb = n[0]
+    # nc = n[1]
+    # nd = n[2]
+    # na = n[3]
+    # nk = n[4]
 
     nh = h.shape[0]-1
     ng = g.shape[0]-nk
@@ -610,6 +673,7 @@ def get_initial_estimate_box_jenkins(n,n_high_order_approx, y,u):
     theta_init_bj : numpy.ndarray
         Initial parameter vector estimate for Box-Jenkins model.
     """
+    validate_inputs(n, u, y, "Box-Jenkins") # The Box-Jenkins is a placeholder for the FIR model
     #nb = n[0]
     #nc = n[1]
     #nd = n[2]
@@ -648,7 +712,8 @@ def get_regression_matrix(w,t0,i1,i2):
     -------
     phi : np.ndarray
         Regression matrix, where each row contains past values of `w` from index `t0`.
-    """    
+    """ 
+    
     N = w.shape[0]
     phi = np.zeros((N-t0+i1,i2-i1))
     
