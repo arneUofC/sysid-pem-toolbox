@@ -45,26 +45,30 @@ def theta_2_BCDF(theta, n):
     # Ensuring dimensions of B and F are consistent with nf
     if nf + 1 > nb:
         B = np.concatenate((theta_b, np.zeros(nf + 1 - nb)))
+        F = theta_f
     elif nf + 1 == nb:
         B = theta_b
+        F = theta_f
     else:
-        raise ValueError('Must choose proper transfer function for plant model.')
+        B = theta_b
+        F = np.concatenate((theta_f, np.zeros(nb-nf-1)))
+        #raise ValueError('Must choose proper transfer function for plant model.')
 
     # Adding delay (nk) to F if nk > 0
     if nk > 0:
-        F = np.concatenate((theta_f, np.zeros(nk)))
-    else:
-        F = theta_f 
+        F = np.concatenate((F, np.zeros(nk)))
 
     # Ensuring dimensions of C and D are consistent with nd
     if nd > nc:
         C = np.concatenate((theta_c, np.zeros(nd - nc)))
+        D = theta_d
     elif nc == nd:
         C = theta_c
+        D = theta_d
     else:
-        raise ValueError('Must choose proper transfer function for noise model.')
-
-    D = theta_d
+        C = theta_c
+        D = np.concatenate(theta_d, np.zeros(nc-nd))
+        #raise ValueError('Must choose proper transfer function for noise model.')
 
     return B, C, D, F
 
@@ -524,9 +528,7 @@ def auto_correlation_test(epsilon,tau = 50):
 
 def FIR_estimates_GH(n, y, u):
 
-
     na, nb, nk = n
-
     ng = nb+1
     nh = na+1
 
@@ -573,10 +575,13 @@ def tf_realization_GH(g,h,n):
     thetaBA = np.linalg.inv( M.T @ M ) @ (M.T @ g[nk:ng+nk] )
     
     # Create Toeplitz matrix for H transfer function realization
-    Ch = np.array(sp.linalg.toeplitz(h[0:nh],r=np.concatenate(([1],np.zeros(nd-1)))))
-    Meye = np.concatenate((np.eye(nc), np.zeros((nh-nc,nc))),axis=0)
-    M = np.concatenate((Meye,-Ch),axis=1)
-    thetaCD = np.linalg.inv( M.T @ M ) @ (M.T @ h[1:nh+1] )
+    if nc==0 and nd==0:
+        thetaCD = []
+    elif nc>0 and nd>0:
+        Ch = np.array(sp.linalg.toeplitz(h[0:nh],r=np.concatenate(([1],np.zeros(nd-1)))))
+        Meye = np.concatenate((np.eye(nc), np.zeros((nh-nc,nc))),axis=0)
+        M = np.concatenate((Meye,-Ch),axis=1)
+        thetaCD = np.linalg.inv( M.T @ M ) @ (M.T @ h[1:nh+1] )
 
     theta = np.concatenate((thetaBA[0:nb], thetaCD, thetaBA[nb:nb+na]))
     return theta
