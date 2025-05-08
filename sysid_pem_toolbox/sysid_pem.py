@@ -419,7 +419,7 @@ def V_arx_lin_reg(n, y, u):
         Estimated parameters of the ARX model.
     """
     validate_inputs(n, u, y, "ARX")
-    
+
     # Extract orders and delay from the input tuple `n`
     na, nb, nk = n
     
@@ -431,6 +431,9 @@ def V_arx_lin_reg(n, y, u):
     t0 = np.maximum(na - 1, nb + nk - 1)
     N = y.shape[0]  
 
+    if (t0 >= N) or (na+nb >= N):
+        raise Exception('Number of parameters is too large for given data length')
+    
     # Constructing the regressor matrix (phi)
     phi = np.zeros((N - t0, na + nb))
     
